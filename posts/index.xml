@@ -2,45 +2,46 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on My New Hugo Site</title>
-    <link>http://example.org/posts/</link>
+    <link>https://v3ct0r719.github.io/posts/</link>
     <description>Recent content in Posts on My New Hugo Site</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 22 Jan 2020 12:04:40 +0000</lastBuildDate>
     
-	<atom:link href="http://example.org/posts/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://v3ct0r719.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Too Much Crypto</title>
-      <link>http://example.org/posts/toomuchcrypto/</link>
+      <link>https://v3ct0r719.github.io/posts/toomuchcrypto/</link>
       <pubDate>Wed, 22 Jan 2020 12:04:40 +0000</pubDate>
       
-      <guid>http://example.org/posts/toomuchcrypto/</guid>
+      <guid>https://v3ct0r719.github.io/posts/toomuchcrypto/</guid>
       <description>Recently I read a really interesting research paper called Too Much Crypto. Lets see what its all about.
 This mainly focuses on the issue, whether the rounds pertaining symmetric cryptosystem&#39;s are really plentiful, if we reduce the rounds how much will it affect the security of the cryptosystem ,what is the minimum number of rounds for each cryptosystem which will still maintain the status of &amp;ldquo;safe&amp;rdquo;, i.e. to determine the safety margin.</description>
     </item>
     
     <item>
       <title>PRetty stroNG - InCTF Internationals 2019</title>
-      <link>http://example.org/posts/inctf/</link>
+      <link>https://v3ct0r719.github.io/posts/inctf/</link>
       <pubDate>Tue, 01 Oct 2019 14:04:40 +0000</pubDate>
       
-      <guid>http://example.org/posts/inctf/</guid>
-      <description>Intended solution of PRetty stroNG challenge from InCTF Internationals 2019
+      <guid>https://v3ct0r719.github.io/posts/inctf/</guid>
+      <description>I created a challenge for this year&#39;s InCTF International. Its based on a PRNG called Xoroshiro128+.
+Intended solution of PRetty stroNG challenge from InCTF Internationals 2019
 Challenge Points: 1000
 Challenge Solves: 1
 Challenge Author: v3ct0r
-Challenge Description Introduction You are given this challenge file and a service which hosts this.
-#!/usr/bin/env python2 from Crypto.Cipher import AES from Crypto.Util.number import * from hashlib import * import sys,random,os from secret import FLAG,secret,messages class PRNG(object): def __init__(self, seed1,seed2): self.seed1 = seed1 self.seed2 = seed2 @staticmethod def rotl(x, k): return ((x &amp;lt;&amp;lt; k) &amp;amp; 0xffffffffffffffff) | (x &amp;gt;&amp;gt; 0x40 - k) def next(self): s0 = self.</description>
+Introduction You are given this challenge file and a service which hosts this.
+#!/usr/bin/env python2 from Crypto.Cipher import AES from Crypto.Util.number import * from hashlib import * import sys,random,os from secret import FLAG,secret,messages class PRNG(object): def __init__(self, seed1,seed2): self.</description>
     </item>
     
     <item>
       <title>TokyoWesterns CTF 2018</title>
-      <link>http://example.org/posts/tokyowesters/</link>
+      <link>https://v3ct0r719.github.io/posts/tokyowesters/</link>
       <pubDate>Wed, 12 Sep 2018 12:04:40 +0000</pubDate>
       
-      <guid>http://example.org/posts/tokyowesters/</guid>
+      <guid>https://v3ct0r719.github.io/posts/tokyowesters/</guid>
       <description>This has been an Interesting CTF, we had a lot of fun in solving these question.
 Revolutional Secure Angou This was a pretty easy question to solve and we were able to do it quickly. This is a ruby script given of how the encryption took place.
 require &amp;#39;openssl&amp;#39; e = 65537 while true p = OpenSSL::BN.generate_prime(1024, false) q = OpenSSL::BN.new(e).mod_inverse(p) next unless q.prime? key = OpenSSL::PKey::RSA.new key.set_key(p.to_i * q.to_i, e, nil) File.</description>
