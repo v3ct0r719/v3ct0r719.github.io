@@ -1,0 +1,195 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>v3ct0r - TokyoWesterns CTF 2018</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+	
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/font-awesome/css/all.min.css" rel="stylesheet" type="text/css" media="all">
+
+    <script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[','\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+</script>
+
+
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="http://example.org/posts/tokyowesters/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="My New Hugo Site">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+  <div id="navbar-inner">
+    <div id="logo">
+       <a href=""><img src="/images/letter-a.png" width="100px"></img></a>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/posts/tokyowesters/">TokyoWesterns CTF 2018</a></h1>
+	        <div class="post-time">September 12 2018</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="http://example.org//tags/twctf">TWCTF</a>
+	            
+	                <a href="http://example.org//tags/rsa">RSA</a>
+	            
+	                <a href="http://example.org//tags/number-theory">Number Theory</a>
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        <p>This has been an Interesting CTF, we had a lot of fun in solving these question.</p>
+<h3 id="revolutional-secure-angou">Revolutional Secure Angou</h3>
+<p>This was a pretty easy question to solve and we were able to do it quickly. This is a ruby script given of how the encryption took place.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ruby" data-lang="ruby">require <span style="color:#e6db74">&#39;openssl&#39;</span>
+
+e <span style="color:#f92672">=</span> <span style="color:#ae81ff">65537</span>
+<span style="color:#f92672"></span><span style="color:#66d9ef">while</span> <span style="color:#66d9ef">true</span>
+  p <span style="color:#f92672">=</span> <span style="color:#66d9ef">OpenSSL</span><span style="color:#f92672">::</span><span style="color:#66d9ef">BN</span><span style="color:#f92672">.</span>generate_prime(<span style="color:#ae81ff">1024</span><span style="color:#f92672"></span>, <span style="color:#66d9ef">false</span>)
+  q <span style="color:#f92672">=</span> <span style="color:#66d9ef">OpenSSL</span><span style="color:#f92672">::</span><span style="color:#66d9ef">BN</span><span style="color:#f92672">.</span>new(e)<span style="color:#f92672">.</span>mod_inverse(p)
+  <span style="color:#66d9ef">next</span> <span style="color:#66d9ef">unless</span> q<span style="color:#f92672">.</span>prime?
+  key <span style="color:#f92672">=</span> <span style="color:#66d9ef">OpenSSL</span><span style="color:#f92672">::</span><span style="color:#66d9ef">PKey</span><span style="color:#f92672">::</span><span style="color:#66d9ef">RSA</span><span style="color:#f92672">.</span>new
+  key<span style="color:#f92672">.</span>set_key(p<span style="color:#f92672">.</span>to_i <span style="color:#f92672">*</span> q<span style="color:#f92672">.</span>to_i, e, <span style="color:#66d9ef">nil</span>)
+  <span style="color:#66d9ef">File</span><span style="color:#f92672">.</span>write(<span style="color:#e6db74">&#39;publickey.pem&#39;</span>, key<span style="color:#f92672">.</span>to_pem)
+  <span style="color:#66d9ef">File</span><span style="color:#f92672">.</span>binwrite(<span style="color:#e6db74">&#39;flag.encrypted&#39;</span>, key<span style="color:#f92672">.</span>public_encrypt(<span style="color:#66d9ef">File</span><span style="color:#f92672">.</span>binread(<span style="color:#e6db74">&#39;flag&#39;</span>)))
+  <span style="color:#66d9ef">break</span>
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>After examining the script we find that the Key generation is a bit weird here. The second prime is equal to the modular inverse of the public key exponent <strong>e</strong> to the first prime <strong>p</strong> ,</p>
+<p>\begin{align}
+q &amp; = e ^ {-1} \bmod p \newline
+eq &amp; = 1 \bmod p \newline
+eq &amp; = 1 + kp \newline
+p &amp; = ((eq) - 1) * k \newline
+\end{align}</p>
+<p>we know that ,
+$ n = p * q$
+substituting p in this equation,
+$ q*((e * q) - 1)/k = n$
+simplifying the equation,
+$ eq ^ 2 - q - kn =0 $</p>
+<p>Now this becomes a simple linear equation which can be simplified to get <strong>q</strong> . After getting <strong>q,</strong> a matter of time before you could just decrypt it. Here is the python code I used to solve this challenge.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> Crypto.PublicKey <span style="color:#f92672">import</span> RSA
+<span style="color:#f92672">import</span> gmpy2
+
+
+ct <span style="color:#f92672">=</span> bytes_to_long(open(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">flag.encrypted</span><span style="color:#e6db74">&#39;</span>)<span style="color:#f92672">.</span>read())
+
+f <span style="color:#f92672">=</span> open(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">publickey.pem</span><span style="color:#e6db74">&#39;</span>)<span style="color:#f92672">.</span>read()
+n <span style="color:#f92672">=</span> RSA<span style="color:#f92672">.</span>importKey(f)<span style="color:#f92672">.</span>n
+e <span style="color:#f92672">=</span> RSA<span style="color:#f92672">.</span>importKey(f)<span style="color:#f92672">.</span>e
+i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+<span style="color:#66d9ef">while</span>(True):
+	<span style="color:#66d9ef">if</span> GCD(n,gmpy2<span style="color:#f92672">.</span>iroot(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>(<span style="color:#ae81ff">4</span><span style="color:#f92672">*</span>e<span style="color:#f92672">*</span>n<span style="color:#f92672">*</span>i),<span style="color:#ae81ff">2</span>)[<span style="color:#ae81ff">0</span>])<span style="color:#f92672">!=</span><span style="color:#ae81ff">1</span>:
+		q <span style="color:#f92672">=</span> GCD(n,gmpy2<span style="color:#f92672">.</span>iroot(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>(<span style="color:#ae81ff">4</span><span style="color:#f92672">*</span>e<span style="color:#f92672">*</span>n<span style="color:#f92672">*</span>i),<span style="color:#ae81ff">2</span>)[<span style="color:#ae81ff">0</span>])
+		<span style="color:#66d9ef">break</span>
+	i<span style="color:#f92672">=</span>i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>
+p <span style="color:#f92672">=</span> n <span style="color:#f92672">/</span> q
+
+phin <span style="color:#f92672">=</span> (p<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)<span style="color:#f92672">*</span>(q<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
+d <span style="color:#f92672">=</span> inverse(e,phin)
+<span style="color:#66d9ef">print</span> long_to_bytes(pow(ct,d,n))
+
+</code></pre></div><blockquote>
+<p>TWCTF{9c10a83c122a9adfe6586f498655016d3267f195}</p>
+</blockquote>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+    		Cyber Security Enthusiast, Cryptography and Cryptanalysis with <strong><a href="https://twitter.com/teambi0s">@teambi0s</a></strong> . Love what I do ;)
+
+    </p>
+</div>
+
+		<nav id="pagination">
+			<a class="prev" href="http://example.org/posts/inctf/">Prev</a>
+			
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© Vivek N J</p>
+				<p><a class="icon" target="_blank" href="https://github.com/v3ct0r719"><i class="fab fa-github"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://twitter.com/__v3ct0r__">
+			    <i class="fab fa-twitter"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://www.linkedin.com/in/vivek-n-j-168b24151">
+			    <i class="fab fa-linkedin"></i></a>  
+			
+		      
+			
+			  <a class="icon" target="_blank" href="mailto:viveknj719@gmail.com">
+			    <i class="fas fa-envelope"></i></a>
+			
+		      
+		    </p>
+		
+			</footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":change-me";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 4]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+
+
+</html>
+

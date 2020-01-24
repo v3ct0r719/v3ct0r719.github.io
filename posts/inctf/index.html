@@ -1,0 +1,479 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>v3ct0r - PRetty stroNG - InCTF Internationals 2019</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+	
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/font-awesome/css/all.min.css" rel="stylesheet" type="text/css" media="all">
+
+    <script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[','\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+</script>
+
+
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="http://example.org/posts/inctf/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="My New Hugo Site">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+  <div id="navbar-inner">
+    <div id="logo">
+       <a href=""><img src="/images/letter-a.png" width="100px"></img></a>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/posts/inctf/">PRetty stroNG - InCTF Internationals 2019</a></h1>
+	        <div class="post-time">October 1 2019</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="http://example.org//tags/inctfi">InCTFi</a>
+	            
+	                <a href="http://example.org//tags/prng">PRNG</a>
+	            
+	                <a href="http://example.org//tags/dlp">DLP</a>
+	            
+	                <a href="http://example.org//tags/elgamal">ElGamal</a>
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        <p>Intended solution of PRetty stroNG challenge from InCTF Internationals 2019</p>
+<p><strong>Challenge Points</strong>: 1000</p>
+<p><strong>Challenge Solves</strong>: 1</p>
+<p><strong>Challenge Author</strong>: <a href="https://twitter.com/__v3ct0r__">v3ct0r</a></p>
+<h2 id="challenge-description">Challenge Description</h2>
+<p><img src="pic.png" alt="pic"></p>
+<h2 id="introduction">Introduction</h2>
+<p>You are given this challenge file and a service which hosts this.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/env python2</span>
+<span style="color:#f92672">from</span> Crypto.Cipher <span style="color:#f92672">import</span> AES
+<span style="color:#f92672">from</span> Crypto.Util.number <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> hashlib <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">import</span> sys<span style="color:#f92672">,</span>random<span style="color:#f92672">,</span>os
+<span style="color:#f92672">from</span> secret <span style="color:#f92672">import</span> FLAG,secret,messages
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PRNG</span>(object):
+    <span style="color:#66d9ef">def</span> __init__(self, seed1,seed2):
+            self<span style="color:#f92672">.</span>seed1 <span style="color:#f92672">=</span> seed1
+            self<span style="color:#f92672">.</span>seed2 <span style="color:#f92672">=</span> seed2
+    
+    <span style="color:#a6e22e">@staticmethod</span>
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rotl</span>(x, k):
+            <span style="color:#66d9ef">return</span> ((x <span style="color:#f92672">&lt;&lt;</span> k) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>) <span style="color:#f92672">|</span> (x <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">0x40</span> <span style="color:#f92672">-</span> k)
+    
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">next</span>(self):
+            s0 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>seed1
+            s1 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>seed2
+            result <span style="color:#f92672">=</span> (s0 <span style="color:#f92672">+</span> s1) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>
+            
+            s1 <span style="color:#f92672">^</span><span style="color:#f92672">=</span> s0
+            self<span style="color:#f92672">.</span>seed1 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rotl(s0, <span style="color:#ae81ff">0x37</span>) <span style="color:#f92672">^</span> s1 <span style="color:#f92672">^</span> ((s1 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">0xe</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>)
+            self<span style="color:#f92672">.</span>seed2 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rotl(s1, <span style="color:#ae81ff">0x24</span>)
+            
+            <span style="color:#66d9ef">return</span> result
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">left_right</span>(num):
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">2863311530</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1431655765</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">1</span>))   
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3435973836</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">858993459</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">2</span>))   
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">4042322160</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">252645135</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">4</span>))   
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">4278255360</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">16711935</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">8</span>))   
+    <span style="color:#66d9ef">return</span>((num <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">16</span>) <span style="color:#f92672">|</span> (num <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">16</span>))
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapper</span>(x):
+    a <span style="color:#f92672">=</span> left_right(x<span style="color:#f92672">/</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#f92672">*</span><span style="color:#ae81ff">32</span>))
+    b <span style="color:#f92672">=</span> left_right(x<span style="color:#f92672">%</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#f92672">*</span><span style="color:#ae81ff">32</span>))
+    <span style="color:#66d9ef">return</span> (a <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">64</span>) <span style="color:#f92672">+</span> b
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">Encryption_Box</span>(message):
+    m <span style="color:#f92672">=</span> bytes_to_long(message)
+    h <span style="color:#f92672">=</span> pow(g, secret, p)
+    y <span style="color:#f92672">=</span> wrapper(gen<span style="color:#f92672">.</span>next())
+    c1 <span style="color:#f92672">=</span> pow(g, y, p)
+    s <span style="color:#f92672">=</span> pow(h,y,p)
+    c2 <span style="color:#f92672">=</span> (m<span style="color:#f92672">*</span>s) <span style="color:#f92672">%</span> p
+    <span style="color:#66d9ef">return</span> hex(c1),hex(c2)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">Decryption_Box</span>(c1,c2):
+    s <span style="color:#f92672">=</span> pow(c1,secret,p)
+    m <span style="color:#f92672">=</span> (c2<span style="color:#f92672">*</span>inverse(s,p))<span style="color:#f92672">%</span>p
+    message <span style="color:#f92672">=</span> long_to_bytes(m)
+    <span style="color:#66d9ef">if</span> message <span style="color:#f92672">in</span> messages:
+        <span style="color:#66d9ef">return</span> message
+    <span style="color:#66d9ef">return</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Nice Try!</span><span style="color:#e6db74">&#34;</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">Super_Encrypion_Box</span>(key):
+    key <span style="color:#f92672">=</span> sha256(long_to_bytes(key))<span style="color:#f92672">.</span>digest()
+    aes <span style="color:#f92672">=</span> AES<span style="color:#f92672">.</span>new(key,AES<span style="color:#f92672">.</span>MODE_CBC,md5(key)<span style="color:#f92672">.</span>digest())
+    ct <span style="color:#f92672">=</span> aes<span style="color:#f92672">.</span>encrypt(FLAG)
+    <span style="color:#66d9ef">return</span> ct<span style="color:#f92672">.</span>encode(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">hex</span><span style="color:#e6db74">&#39;</span>)
+
+
+<span style="color:#66d9ef">if</span> __name__<span style="color:#f92672">==</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">__main__</span><span style="color:#e6db74">&#34;</span>:
+    
+    g <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+    p <span style="color:#f92672">=</span> <span style="color:#ae81ff">7199773997391911030609999317773941274322764333428698921736339643928346453700085358802973900485592910475480089726140708102474957429903531369589969318716771</span>
+    seed1 <span style="color:#f92672">=</span> bytes_to_long(os<span style="color:#f92672">.</span>urandom(<span style="color:#ae81ff">8</span>))
+    seed2 <span style="color:#f92672">=</span> bytes_to_long(os<span style="color:#f92672">.</span>urandom(<span style="color:#ae81ff">8</span>))
+    gen <span style="color:#f92672">=</span> PRNG(seed1,seed2)
+    
+    <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[1] Encryption Box</span><span style="color:#e6db74">&#34;</span>
+    <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[2] Super Encryption Box</span><span style="color:#e6db74">&#34;</span>
+    <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[3] Decryption Box</span><span style="color:#e6db74">&#34;</span>
+    <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[4] Exit</span><span style="color:#e6db74">&#34;</span>
+
+    <span style="color:#66d9ef">for</span> _ <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">30</span>):    
+        <span style="color:#66d9ef">try</span>:
+            ch <span style="color:#f92672">=</span> int(raw_input(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">Enter option &gt; </span><span style="color:#e6db74">&#39;</span>))
+        <span style="color:#66d9ef">except</span>:
+            <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Error!</span><span style="color:#e6db74">&#34;</span>
+            sys<span style="color:#f92672">.</span>exit()
+        <span style="color:#66d9ef">if</span> ch <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>:
+            random<span style="color:#f92672">.</span>shuffle(messages)
+            <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Here is your Encrypted Message:</span><span style="color:#e6db74">&#34;</span>, Encryption_Box(messages[<span style="color:#ae81ff">0</span>])
+        <span style="color:#66d9ef">elif</span> ch <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>:
+            <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Here is your flag:</span><span style="color:#e6db74">&#34;</span>, Super_Encrypion_Box(gen<span style="color:#f92672">.</span>next())
+        <span style="color:#66d9ef">elif</span> ch <span style="color:#f92672">==</span> <span style="color:#ae81ff">3</span>:
+            <span style="color:#66d9ef">try</span>:
+                c1 <span style="color:#f92672">=</span> raw_input(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Enter first ciphertext c1 (in hex): </span><span style="color:#e6db74">&#34;</span>)
+                c2 <span style="color:#f92672">=</span> raw_input(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Enter second ciphertext c2 (in hex): </span><span style="color:#e6db74">&#34;</span>)
+                c1 <span style="color:#f92672">=</span> int(c1,<span style="color:#ae81ff">16</span>)
+                c2 <span style="color:#f92672">=</span> int(c2,<span style="color:#ae81ff">16</span>)
+                <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Here is your message:</span><span style="color:#e6db74">&#34;</span>, Decryption_Box(c1,c2)
+            <span style="color:#66d9ef">except</span>:
+                <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Wrong Input !!</span><span style="color:#e6db74">&#34;</span>
+                sys<span style="color:#f92672">.</span>exit()
+        <span style="color:#66d9ef">elif</span> ch <span style="color:#f92672">==</span> <span style="color:#ae81ff">4</span>:
+            <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Bye!</span><span style="color:#e6db74">&#34;</span>
+            sys<span style="color:#f92672">.</span>exit()
+        <span style="color:#66d9ef">else</span>:
+            <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Error!</span><span style="color:#e6db74">&#34;</span>
+            sys<span style="color:#f92672">.</span>exit()
+</code></pre></div><p>As you can see that there are 4 options, lets see what they do.</p>
+<ol>
+<li>It justs encrypt random messages with the elgamal Encryption</li>
+<li>Encrypts the flag using key and iv derived from the</li>
+<li>Decrypts the message encrypted in <strong>1</strong>.</li>
+<li>Exits from service</li>
+</ol>
+<h2 id="writeup">Writeup</h2>
+<p>At first look there doesn't seem any use for the 1st and 3rd option. But we'll get to that part. First what we need is a few samples of the output generated by the PRNG, thats where the option 1 comes into play. If you look at the function <code>Encryption_Box</code> you will see that we have used the PRNG to generate the random ephemeral key (y). But how do we get it.</p>
+<p>The only way to get that is to solve the DLP. Lets try out various attacks. First lets examine the prime. After factoring the order of the group i.e. <code>p-1</code> you will see that it has many factors. This gives way for us to use pohlig hellman, and soon enough it works. Now lets move on to the next step.</p>
+<p>Seems that the actual value is passed inside the wrapped function, i.e. the value of we got by solving DLP is the output of the wrapper function. So lets reverse the function. And by reverse I mean literally reverse, what the function <code>left_right</code> does is that it reverses the bits of its inputs (it may add some bits at the end but input can be easily recovered by ignoring the other bits). The rest is easy. Now that you have got the values what to do now.</p>
+<p>The PRNG we used here is a well known random generator called <code>Xoroshiro128+</code>. But it had a vulnerability that you can predict the seed using few outputs. There are few <a href="https://lemire.me/blog/2017/08/22/cracking-random-number-generators-xoroshiro128/"><strong>resources</strong></a> available to know more about them. After we get the seed its only a matter of time to get the key with which the flag was encrypted.</p>
+<p>Here is the exploit script.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">from</span> Crypto.Util.number <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> hashlib <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+<span style="color:#f92672">from</span> Crypto.Cipher <span style="color:#f92672">import</span> AES
+<span style="color:#f92672">import</span> z3
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">sym_xoroshiro128plus</span>(solver, sym_s0, sym_s1, mask, result):
+        s0 <span style="color:#f92672">=</span> sym_s0
+        s1 <span style="color:#f92672">=</span> sym_s1
+        sym_r <span style="color:#f92672">=</span> (sym_s0 <span style="color:#f92672">+</span> sym_s1)
+
+        condition <span style="color:#f92672">=</span> z3<span style="color:#f92672">.</span>Bool(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">c0x</span><span style="color:#e6db74">%0.16x</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> result)
+        solver<span style="color:#f92672">.</span>add(z3<span style="color:#f92672">.</span>Implies(condition, (sym_r <span style="color:#f92672">&amp;</span> mask) <span style="color:#f92672">==</span> result <span style="color:#f92672">&amp;</span> mask))
+
+        s1 <span style="color:#f92672">^</span><span style="color:#f92672">=</span> s0
+        sym_s0 <span style="color:#f92672">=</span> z3<span style="color:#f92672">.</span>RotateLeft(s0, <span style="color:#ae81ff">55</span>) <span style="color:#f92672">^</span> s1 <span style="color:#f92672">^</span> (s1 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">14</span>)
+        sym_s1 <span style="color:#f92672">=</span> z3<span style="color:#f92672">.</span>RotateLeft(s1, <span style="color:#ae81ff">36</span>)
+
+        <span style="color:#66d9ef">return</span> sym_s0, sym_s1, condition
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">find_seed</span>(results_with_masks):
+        start_s0, start_s1 <span style="color:#f92672">=</span> z3<span style="color:#f92672">.</span>BitVecs(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">start_s0 start_s1</span><span style="color:#e6db74">&#39;</span>, <span style="color:#ae81ff">64</span>)
+        sym_s0 <span style="color:#f92672">=</span> start_s0
+        sym_s1 <span style="color:#f92672">=</span> start_s1
+        solver <span style="color:#f92672">=</span> z3<span style="color:#f92672">.</span>Solver()
+        conditions <span style="color:#f92672">=</span> []
+
+        <span style="color:#66d9ef">for</span> result, mask <span style="color:#f92672">in</span> results_with_masks:
+                sym_s0, sym_s1, condition <span style="color:#f92672">=</span> sym_xoroshiro128plus(solver, sym_s0, sym_s1, mask, result)
+                conditions<span style="color:#f92672">.</span>append(condition)
+
+        <span style="color:#66d9ef">if</span> solver<span style="color:#f92672">.</span>check(conditions) <span style="color:#f92672">==</span> z3<span style="color:#f92672">.</span>sat:
+                model <span style="color:#f92672">=</span> solver<span style="color:#f92672">.</span>model()
+
+                <span style="color:#66d9ef">return</span> (model[start_s0]<span style="color:#f92672">.</span>as_long(), model[start_s1]<span style="color:#f92672">.</span>as_long())
+
+        <span style="color:#66d9ef">else</span>:
+                <span style="color:#66d9ef">return</span> None
+
+<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PRNG</span>(object):
+    <span style="color:#66d9ef">def</span> __init__(self, seed1,seed2):
+            self<span style="color:#f92672">.</span>seed1 <span style="color:#f92672">=</span> seed1
+            self<span style="color:#f92672">.</span>seed2 <span style="color:#f92672">=</span> seed2
+   
+    <span style="color:#a6e22e">@staticmethod</span>
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">rotl</span>(x, k):
+            <span style="color:#66d9ef">return</span> ((x <span style="color:#f92672">&lt;&lt;</span> k) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>) <span style="color:#f92672">|</span> (x <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">64</span> <span style="color:#f92672">-</span> k)
+   
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">next</span>(self):
+            s0 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>seed1
+            s1 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>seed2
+            result <span style="color:#f92672">=</span> (s0 <span style="color:#f92672">+</span> s1) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>
+
+            s1 <span style="color:#f92672">^</span><span style="color:#f92672">=</span> s0
+            self<span style="color:#f92672">.</span>seed1 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rotl(s0, <span style="color:#ae81ff">55</span>) <span style="color:#f92672">^</span> s1 <span style="color:#f92672">^</span> ((s1 <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">14</span>) <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xffffffffffffffff</span>)
+            self<span style="color:#f92672">.</span>seed2 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>rotl(s1, <span style="color:#ae81ff">36</span>)
+
+            <span style="color:#66d9ef">return</span> result
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">crt</span>(list_a, list_m):
+    <span style="color:#66d9ef">try</span>:
+        <span style="color:#66d9ef">assert</span> len(list_a) <span style="color:#f92672">==</span> len(list_m)
+    <span style="color:#66d9ef">except</span>:
+        <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[+] Length of list_a should be equal to length of list_m</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_m)):
+        <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(len(list_m)):
+            <span style="color:#66d9ef">if</span> GCD(list_m[i], list_m[j])<span style="color:#f92672">!=</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">and</span> i<span style="color:#f92672">!=</span>j:
+                <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[+] Moduli should be pairwise co-prime</span><span style="color:#e6db74">&#34;</span>
+                <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+    M <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> list_m:
+        M <span style="color:#f92672">*</span><span style="color:#f92672">=</span> i
+    list_b <span style="color:#f92672">=</span> [M<span style="color:#f92672">/</span>i <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> list_m]
+    <span style="color:#66d9ef">assert</span> len(list_b) <span style="color:#f92672">==</span> len(list_m)
+    <span style="color:#66d9ef">try</span>:
+        <span style="color:#66d9ef">assert</span> [GCD(list_b[i], list_m[i]) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_m))]
+        list_b_inv <span style="color:#f92672">=</span> [int(inverse(list_b[i], list_m[i])) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_m))]
+    <span style="color:#66d9ef">except</span>:
+        <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[+] Encountered an unusual error while calculating inverse using gmpy2.invert()</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+    x <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_m)):
+        x <span style="color:#f92672">+</span><span style="color:#f92672">=</span> list_a[i]<span style="color:#f92672">*</span>list_b[i]<span style="color:#f92672">*</span>list_b_inv[i]
+    <span style="color:#66d9ef">return</span> x <span style="color:#f92672">%</span> M
+
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">brute_dlp</span>(g,a,p):
+    x<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+    <span style="color:#66d9ef">while</span>(True):
+        <span style="color:#66d9ef">if</span> pow(g,x,p)<span style="color:#f92672">==</span>a:
+            <span style="color:#66d9ef">return</span> x
+        <span style="color:#66d9ef">else</span>:
+            x<span style="color:#f92672">+</span><span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pohlig_hellman_pp</span>(g, y, p, q, e):
+    <span style="color:#66d9ef">try</span>:
+        <span style="color:#75715e"># Assume q is a factor of p-1</span>
+        <span style="color:#66d9ef">assert</span> (p<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">%</span> q <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>
+    <span style="color:#66d9ef">except</span>:
+        <span style="color:#66d9ef">print</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">[-] Error! q**e not a factor of p-1</span><span style="color:#e6db74">&#34;</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>
+
+    <span style="color:#75715e"># a = a_0*(q**0) + a_1*(q**1) + a_2*(q**2) + ... + a_(e-1)*(q**(e-1)) + s*(q**e)</span>
+    <span style="color:#75715e"># where a_0, a_1, a_2, ..., a_(e-1) belong to {0,1,...,q-1} and s is some integer</span>
+    a <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+    b_j <span style="color:#f92672">=</span> y
+    alpha <span style="color:#f92672">=</span> pow(g, (p<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)<span style="color:#f92672">/</span>q, p)
+    <span style="color:#66d9ef">for</span> j <span style="color:#f92672">in</span> range(e):
+        y_i <span style="color:#f92672">=</span> pow(b_j, (p<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)<span style="color:#f92672">/</span>(q<span style="color:#f92672">*</span><span style="color:#f92672">*</span>(j<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>)), p)
+        a_j <span style="color:#f92672">=</span> brute_dlp(alpha, y_i, p)
+        <span style="color:#75715e">#assert a_j &gt;= 0 and a_j &lt;= q-1</span>
+        a <span style="color:#f92672">+</span><span style="color:#f92672">=</span> a_j<span style="color:#f92672">*</span>(q<span style="color:#f92672">*</span><span style="color:#f92672">*</span>j)
+
+        multiplier <span style="color:#f92672">=</span> pow(g, a_j<span style="color:#f92672">*</span>(q<span style="color:#f92672">*</span><span style="color:#f92672">*</span>j), p)
+        <span style="color:#66d9ef">assert</span> GCD(multiplier, p) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>
+        b_j <span style="color:#f92672">=</span> (b_j <span style="color:#f92672">*</span> inverse(multiplier, p)) <span style="color:#f92672">%</span> p
+    <span style="color:#66d9ef">return</span> a
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">pohlig_hellman</span>(g, y, p, list_q, list_e):
+    x_list <span style="color:#f92672">=</span> [pohlig_hellman_pp(g, y, p, list_q[i], list_e[i]) <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_q))]
+    mod_list <span style="color:#f92672">=</span> [list_q[i]<span style="color:#f92672">*</span><span style="color:#f92672">*</span>list_e[i] <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(len(list_q))]
+    <span style="color:#66d9ef">return</span> crt(x_list, mod_list)
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">left_right</span>(num):
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">2863311530</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">1431655765</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">1</span>))
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">3435973836</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">858993459</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">2</span>))
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">4042322160</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">252645135</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">4</span>))
+    num <span style="color:#f92672">=</span> (((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">4278255360</span>) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">|</span> ((num <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">16711935</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">8</span>))
+    <span style="color:#66d9ef">return</span>((num <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">16</span>) <span style="color:#f92672">|</span> (num <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">16</span>))
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">fix1</span>(x):
+    b <span style="color:#f92672">=</span> bin(x)[<span style="color:#ae81ff">2</span>:][::<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+    flag <span style="color:#f92672">=</span> True
+    i <span style="color:#f92672">=</span><span style="color:#ae81ff">32</span>
+    <span style="color:#66d9ef">while</span>(flag):
+        ans <span style="color:#f92672">=</span> int(b[:i],<span style="color:#ae81ff">2</span>)
+        <span style="color:#66d9ef">if</span> left_right(ans)<span style="color:#f92672">==</span>x:
+            <span style="color:#66d9ef">return</span> ans
+        i<span style="color:#f92672">+</span><span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exploit</span>(a):
+    ph <span style="color:#f92672">=</span> pohlig_hellman(g,a,p,x,y)
+    <span style="color:#66d9ef">assert</span> pow(g,ph,p)<span style="color:#f92672">==</span>a
+    a <span style="color:#f92672">=</span> ph<span style="color:#f92672">/</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#f92672">*</span><span style="color:#ae81ff">64</span>)
+    b <span style="color:#f92672">=</span> ph<span style="color:#f92672">%</span>(<span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#f92672">*</span><span style="color:#ae81ff">64</span>)
+    a <span style="color:#f92672">=</span> fix1(a)
+    b <span style="color:#f92672">=</span> fix1(b)
+    ran <span style="color:#f92672">=</span> (a <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">32</span>) <span style="color:#f92672">+</span> b
+    <span style="color:#66d9ef">return</span> ran
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt</span>(ct,key):
+    key <span style="color:#f92672">=</span> sha256(long_to_bytes(key))<span style="color:#f92672">.</span>digest()
+    aes <span style="color:#f92672">=</span> AES<span style="color:#f92672">.</span>new(key,AES<span style="color:#f92672">.</span>MODE_CBC,md5(key)<span style="color:#f92672">.</span>digest())
+    ct <span style="color:#f92672">=</span> aes<span style="color:#f92672">.</span>decrypt(ct<span style="color:#f92672">.</span>decode(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">hex</span><span style="color:#e6db74">&#39;</span>))
+    <span style="color:#66d9ef">return</span> ct
+
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decrypt_from_seed</span>(seed):
+    genr <span style="color:#f92672">=</span> PRNG(seed[<span style="color:#ae81ff">0</span>],seed[<span style="color:#ae81ff">1</span>])
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">7</span>):
+        key <span style="color:#f92672">=</span> genr<span style="color:#f92672">.</span>next()
+    flag <span style="color:#f92672">=</span> decrypt(fl,key)
+    <span style="color:#66d9ef">if</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">inctf</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">in</span> flag:
+        <span style="color:#66d9ef">return</span> flag
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">create_list</span>(l):
+    lis <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> l:
+        lis<span style="color:#f92672">.</span>append((i,<span style="color:#ae81ff">0xffffffffffffffff</span>))
+    <span style="color:#66d9ef">return</span> lis
+
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">__main__</span><span style="color:#e6db74">&#34;</span>:
+
+    g <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>
+    p <span style="color:#f92672">=</span> <span style="color:#ae81ff">7199773997391911030609999317773941274322764333428698921736339643928346453700085358802973900485592910475480089726140708102474957429903531369589969318716771L</span>
+    x <span style="color:#f92672">=</span> [<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">109</span>, <span style="color:#ae81ff">7963</span>, <span style="color:#ae81ff">8539</span>, <span style="color:#ae81ff">20641</span>, <span style="color:#ae81ff">38833</span>, <span style="color:#ae81ff">39341</span>, <span style="color:#ae81ff">46337</span>, <span style="color:#ae81ff">51977</span>, <span style="color:#ae81ff">54319</span>, <span style="color:#ae81ff">57529</span>]
+    y <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">1</span>]
+
+
+
+    io <span style="color:#f92672">=</span> remote(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">18.218.190.20</span><span style="color:#e6db74">&#39;</span>,<span style="color:#ae81ff">3197</span>)
+    lis <span style="color:#f92672">=</span> []
+    <span style="color:#66d9ef">print</span> io<span style="color:#f92672">.</span>recv()
+    <span style="color:#66d9ef">if</span> io<span style="color:#f92672">.</span>can_recv():
+        io<span style="color:#f92672">.</span>recv()
+    io<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">&gt; </span><span style="color:#e6db74">&#34;</span>)
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">6</span>):
+        io<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">1</span><span style="color:#e6db74">&#39;</span>)
+        s <span style="color:#f92672">=</span> io<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">&gt; </span><span style="color:#e6db74">&#39;</span>)<span style="color:#f92672">.</span>split()
+        so<span style="color:#f92672">=</span>s[<span style="color:#ae81ff">5</span>]<span style="color:#f92672">.</span>split(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">&#34;</span>)
+        c1 <span style="color:#f92672">=</span> eval(so[<span style="color:#ae81ff">1</span>])
+        exp <span style="color:#f92672">=</span> exploit(c1)
+        <span style="color:#66d9ef">print</span> exp
+        lis<span style="color:#f92672">.</span>append(exp)
+    io<span style="color:#f92672">.</span>sendline(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">2</span><span style="color:#e6db74">&#39;</span>)
+    io<span style="color:#f92672">.</span>recvuntil(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">flag:</span><span style="color:#e6db74">&#39;</span>)
+    fg <span style="color:#f92672">=</span> io<span style="color:#f92672">.</span>recv()<span style="color:#f92672">.</span>split()
+    fl <span style="color:#f92672">=</span> fg[<span style="color:#ae81ff">0</span>]
+    sed <span style="color:#f92672">=</span> find_seed(create_list(lis[:<span style="color:#ae81ff">5</span>]))
+    <span style="color:#66d9ef">print</span> decrypt_from_seed(sed)
+
+</code></pre></div><p>Running this script will give us: <strong>inctf{PRNG_n0t_t00_57r0ng_4_y0u}</strong></p>
+<p>In case of any query, feedback or suggestion, feel free to comment or <!-- raw HTML omitted --><a href="https://twitter.com/__v3ct0r__">reach me out on Twitter</a><!-- raw HTML omitted -->!</p>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+    		Cyber Security Enthusiast, Cryptography and Cryptanalysis with <strong><a href="https://twitter.com/teambi0s">@teambi0s</a></strong> . Love what I do ;)
+
+    </p>
+</div>
+
+		<nav id="pagination">
+			<a class="prev" href="http://example.org/posts/toomuchcrypto/">Prev</a>
+			<a class="next" href="http://example.org/posts/tokyowesters/">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© Vivek N J</p>
+				<p><a class="icon" target="_blank" href="https://github.com/v3ct0r719"><i class="fab fa-github"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://twitter.com/__v3ct0r__">
+			    <i class="fab fa-twitter"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://www.linkedin.com/in/vivek-n-j-168b24151">
+			    <i class="fab fa-linkedin"></i></a>  
+			
+		      
+			
+			  <a class="icon" target="_blank" href="mailto:viveknj719@gmail.com">
+			    <i class="fas fa-envelope"></i></a>
+			
+		      
+		    </p>
+		
+			</footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":change-me";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 4]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+
+
+</html>
+

@@ -1,0 +1,196 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>v3ct0r - Too Much Crypto</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+	
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/font-awesome/css/all.min.css" rel="stylesheet" type="text/css" media="all">
+
+    <script type="text/javascript"
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[','\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+</script>
+
+
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="http://example.org/posts/toomuchcrypto/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="My New Hugo Site">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+  <div id="navbar-inner">
+    <div id="logo">
+       <a href=""><img src="/images/letter-a.png" width="100px"></img></a>
+    </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/posts/toomuchcrypto/">Too Much Crypto</a></h1>
+	        <div class="post-time">January 22 2020</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="http://example.org//tags/paper">Paper</a>
+	            
+	                <a href="http://example.org//tags/cryptanalysis">Cryptanalysis</a>
+	            
+	                <a href="http://example.org//tags/symmetric-cryptography">Symmetric Cryptography</a>
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        <p>Recently I read a really interesting research paper called <a href="https://eprint.iacr.org/2019/1492.pdf"><strong>Too Much Crypto</strong></a>. Lets see what its all about.</p>
+<p>This mainly focuses on the issue, whether the rounds pertaining symmetric cryptosystem's are really plentiful, if we reduce the rounds how much will it affect the security of the cryptosystem ,what is the minimum number of rounds for each cryptosystem which will still maintain the status of <strong>&ldquo;safe&rdquo;</strong>, i.e. to determine the safety margin.</p>
+<p>Those who don't know what rounds are, think of it like this, more the no of rounds more will be the security. It is basically the no of times a sequence is repeated.</p>
+<h2 id="start"><strong>Start</strong></h2>
+<p>At the beginning of the paper it moves through the best attacks available to date for AES, BLAKE2, ChaCha and SHA3. But don't worry, none of them actually work. I mean they work, but only theoretically. It can't be practically used to exploit someone. Don't get me wrong, they do work, but will just take a couple of hundred billion years and probably more memory that is available on the face of the earth. Then why are they called attacks, if they won't work practically? Lets answer that first before moving forward</p>
+<h2 id="whats-an-attack"><strong>What's an Attack</strong></h2>
+<p>Now what can be classified as an attack. Suppose there is a cryptosystem with a 32bit security. Obviously it is hilariously bruteforceable, but that cannot be considered as an attack. If it could be broken in less that $2^{32}$ iterations then it could be considered an attack.</p>
+<p>There are two types of attacks,
+first there are academic attacks, which just satisfies the defenition of being an attack. It can't be used to read someone's encrypted messages. Then there are practical attacks which can be used to do the above.</p>
+<p>A very well put thought was,</p>
+<p>It’s hard to draw a line between &ldquo;practical&rdquo; and &ldquo;impractical&rdquo; especially with many nontechnical factors coming into play but it’s safe to say that comparing time and space complexities over (say) $2^{150}$ is meaningless from a risk perspective, for all represent an impossible
+effort. As John Kelsey from NIST once put it,</p>
+<blockquote>
+<p>The difference between 80 bits and 128 bits of key search is like the difference between
+a mission to Mars and a mission to Alpha Centauri. As far as I can see, there is
+no meaningful difference between 192-bit and 256-bit keys in terms of practical
+bruteforce attacks; impossible is impossible.</p>
+</blockquote>
+<p>Although one could argue that Alpha Centauri is relatively close (only 4.367 light years away),
+the energy required to accelerate to the speed of light makes this bound unreachable by a
+human-built spaceship. Because of similar physical limits, a $2^{128}$-operations attack must remain
+fantasy.</p>
+<p>So even if there comes a slightly better attack than before, it still wouldn't make a difference. But eventually it will get better and better, and maybe even one day &hellip; you never know!</p>
+<p>One interesting thing to think about is, what if you found an attack on a cryptosystem, but it is not as good as the existing attacks. Would you think of sharing it, or just shove the thought in some corner of your mind. I think its worthwhile to share it so that others may not create the same mistake, or even have other ideas to better your attack.</p>
+<p>Lets see what the different <code>Attack Taxonamies</code> are</p>
+<h2 id="attack-taxonomy"><strong>Attack Taxonomy</strong></h2>
+<p>We know that not all attacks are the same, they differ by the how impact they create and the ease to exploit it. But this paper suggests a different criteria for examining the severity of Cryptographic Attacks,</p>
+<ul>
+<li><strong>Analyzed</strong>: When an attack is less efficient than a generic attack both numerically and
+in practice, and therefore does not violate security claims, yet is publishable because it
+leverages some internal structure. Example: A key-recovery in time $2^{100}$ and memory $2^{80}$
+for a 128-bit key cipher.</li>
+<li><strong>Attacked</strong>: When an attack is numerically more efficient than any generic attack yet
+remains in the realm of practically impossible tasks. Example: A key-recovery in time
+$2^{220}$ for a 256-bit cipher.</li>
+<li><strong>Wounded</strong>: When an attack is numerically more efficient than any generic attack and
+whose cost is in a &ldquo;danger zone&rdquo; where further improvements could make the attack
+practical now or in a near future. Example: A key-recovery in time $2^{100}$.</li>
+<li><strong>Broken</strong>: When an attack could realistically be carried out now or in the near future.
+Example: A key-recovery in time $2^{80}$.</li>
+</ul>
+<p>Mind you, these are not perfect.</p>
+<p>We started this by asking whether more number of rounds of different symmetric cryptosystems are neccessary to maintain security, if not what are the correct amount of rounds. We need a criteria to decide that imaginary line. At the start we came across a word, <code>Security Margin</code>, lets see what that means.</p>
+<h2 id="security-margin"><strong>Security Margin</strong></h2>
+<p>Suppose you are designing a cryptosystem, and you need to decide on the number of rounds. Naturally you will choose a higher number than neccessary because you don't want your cryptosystem to be broken easily, by easy I meant in 10-20 years. The difference between the number of rounds known to be insufficient and the number of rounds specified is then known as the security margin.</p>
+<p>Basically its a choice taken by a cryptographer depending on how much confidence he has in his creation. If he is confident that only 10 rounds are neccessary and no one will be able to break it, then thats fine.</p>
+<p>One question that arise here is what difference does it make if the number of rounds is a bit more than neccessary. The problem arises in IoT devices which needs to use light weight crypto. In this case, since there is a limitation to processing power and memory, even reducing a single round can make a lot of difference. That's what this paper is pointing out, if you could do a job even a bit quickly without compromising the integrity and security, then why not.</p>
+<p>They have suggested a revision in the number of rounds in the previously discussed Symmetric Cryptosystems. Let's see!</p>
+<h2 id="how-many-rounds"><strong>How many rounds</strong>?</h2>
+<p>The suggestions proposed are</p>
+<ul>
+<li><strong>AES</strong> : 9 rounds instead of 10 for <code>AES-128</code>, 10 instead of 12 for <code>AES-192</code>, 11 instead of 14 for <code>AES-256</code>, yielding respectively a 1.1×, 1.2×, and 1.3× speed-up.</li>
+<li><strong>BLAKE2</strong>: 8 rounds instead of 12 for <code>BLAKE2b</code>, 7 rounds instead of 10 for <code>BLAKE2s</code>, yielding respectively a 1.5× and 1.4× speed-up.</li>
+<li><strong>ChaCha</strong>: 8 rounds instead of 20, yielding a 2.5× speed-up.</li>
+<li><strong>SHA-3</strong>: 10 rounds instead of 24, yielding a 2.4× speed-up.</li>
+</ul>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+    		Cyber Security Enthusiast, Cryptography and Cryptanalysis with <strong><a href="https://twitter.com/teambi0s">@teambi0s</a></strong> . Love what I do ;)
+
+    </p>
+</div>
+
+		<nav id="pagination">
+			
+			<a class="next" href="http://example.org/posts/inctf/">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© Vivek N J</p>
+				<p><a class="icon" target="_blank" href="https://github.com/v3ct0r719"><i class="fab fa-github"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://twitter.com/__v3ct0r__">
+			    <i class="fab fa-twitter"></i></a> 
+			
+		      
+			
+			  <a class="icon" target="_blank" href="https://www.linkedin.com/in/vivek-n-j-168b24151">
+			    <i class="fab fa-linkedin"></i></a>  
+			
+		      
+			
+			  <a class="icon" target="_blank" href="mailto:viveknj719@gmail.com">
+			    <i class="fas fa-envelope"></i></a>
+			
+		      
+		    </p>
+		
+			</footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":change-me";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 4]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+
+
+</html>
+

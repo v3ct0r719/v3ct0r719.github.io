@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>InCTFi on My New Hugo Site</title>
+    <link>http://example.org/tags/inctfi/</link>
+    <description>Recent content in InCTFi on My New Hugo Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 01 Oct 2019 14:04:40 +0000</lastBuildDate>
+    
+	<atom:link href="http://example.org/tags/inctfi/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PRetty stroNG - InCTF Internationals 2019</title>
+      <link>http://example.org/posts/inctf/</link>
+      <pubDate>Tue, 01 Oct 2019 14:04:40 +0000</pubDate>
+      
+      <guid>http://example.org/posts/inctf/</guid>
+      <description>Intended solution of PRetty stroNG challenge from InCTF Internationals 2019
+Challenge Points: 1000
+Challenge Solves: 1
+Challenge Author: v3ct0r
+Challenge Description Introduction You are given this challenge file and a service which hosts this.
+#!/usr/bin/env python2 from Crypto.Cipher import AES from Crypto.Util.number import * from hashlib import * import sys,random,os from secret import FLAG,secret,messages class PRNG(object): def __init__(self, seed1,seed2): self.seed1 = seed1 self.seed2 = seed2 @staticmethod def rotl(x, k): return ((x &amp;lt;&amp;lt; k) &amp;amp; 0xffffffffffffffff) | (x &amp;gt;&amp;gt; 0x40 - k) def next(self): s0 = self.</description>
+    </item>
+    
+  </channel>
+</rss>

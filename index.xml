@@ -1,0 +1,19 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>My New Hugo Site on My New Hugo Site </title>
+    <link>http://example.org/</link>
+    <language>en-us</language>
+    <author>Alexander Ivanov</author>
+    <updated>2020-01-22 12:04:40 &#43;0000 UTC</updated>
+    
+    <item>
+      <title>Posts</title>
+      <link>http://example.org/posts/</link>
+      <pubDate>Wed, 22 Jan 2020 12:04:40 UTC</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://example.org/posts/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
